@@ -1,71 +1,107 @@
-import React from "react";
-import breakfast from "./Image/Breakfast.png";
-import munchies from "./Image/Munchies.png";
-import colddrink from "./Image/Colddrink.png";
-import tea from "./Image/Tea.png";
-import bakery from "./Image/Bakery.png";
-import instantfood from "./Image/Instantfood.png";
-import sweettooth from "./Image/Sweettooth.png";
-import vegtablesfruits from "./Image/Vegtablesfruits.png"
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { useDispatch} from 'react-redux'
+import { DLT,ADD,REMOVE } from '../redux/action'
+
 
 const Category = () => {
-  return (
-    <div className="container">
-      <div className="row mt-4">
-      <h4>Shop by Category</h4>
-        <div className="col-12 col-sm-3">
-          <div className='rounded float-start mt-4 w-75'>
-            <img src={vegtablesfruits} className="img-fluid img-thumbnail" alt='vegtablesfruits' style={{ backgroundColor: "#e1efef", borderRadius: "30px" }} />
-            <b>Vegtables & Fruits</b>
-          </div>
-        </div>
-        <div className="col-4 col-sm-3">
-          <div className='rounded float-start mt-4 w-75'>
-            <img src={breakfast} className="img-fluid img-thumbnail" alt='breakfast' style={{ backgroundColor: "#e1efef", borderRadius: "30px" }} />
-            <b> Dairy & Breakfast</b>
-          </div>
-        </div>
-        <div className="col-4 col-sm-3">
-          <div className='rounded float-start mt-4 w-75'>
-            <img src={munchies} className="img-fluid img-thumbnail" alt='munchies' style={{ backgroundColor: "#e1efef", borderRadius: "30px" }} />
-            <b>Munchies</b>
-          </div>
-        </div>
-        <div className="col-4 col-sm-3">
-          <div className='rounded float-start mt-4 w-75'>
-            <img src={colddrink} className="img-fluid img-thumbnail" alt='colddrink' style={{ backgroundColor: "#e1efef", borderRadius: "30px" }} />
-            <b>Cold Drinks & Juices</b>
-          </div>
-        </div>
+  const [products,setProducts] = useState([]);
+  const [categorys,setCategorys] = useState([]);
 
-        <div className="col-4 col-sm-3">
-          <div className='rounded float-start mt-4 w-75'>
-            <img src={instantfood} className="img-fluid img-thumbnail" alt='instantfood' style={{ backgroundColor: "#e1efef", borderRadius: "30px" }} />
-            <b>Instant & Frozen Food</b>
-          </div>
-        </div>
-        <div className="col-4 col-sm-3">
-          <div className='rounded float-start mt-4 w-75'>
-            <img src={tea} className="img-fluid img-thumbnail" alt='tea' style={{ backgroundColor: "#e1efef", borderRadius: "30px" }} />
-            <b>Tea, Coffee & Health Drinks</b>
-          </div>
-        </div>
-        <div className="col-4 col-sm-3">
-          <div className='rounded float-start mt-4 w-75'>
-            <img src={bakery} className="img-fluid img-thumbnail" alt='bakery' style={{ backgroundColor: "#e1efef", borderRadius: "30px" }} />
-            <b>Bakery & Biscuits</b>
-          </div>
-        </div>
-        <div className="col-4 col-sm-3">
-          <div className='rounded float-start mt-4 w-75'>
-            <img src={sweettooth} className="img-fluid img-thumbnail" alt='sweettooth' style={{ backgroundColor: "#e1efef", borderRadius: "30px" }} />
-            <b>Sweet Tooth</b>
-          </div>
-        </div>
-      </div>
+  const dispatch = useDispatch();
+  const send = (e)=>{
+    // console.log(e);
+    dispatch(ADD(e));
+  }
+
+  useEffect(()=>{
+    getProducts();
+  },[])
+
+  useEffect(()=>{
+    getCategory();
+  },[])
+
+  const getProducts = async()=>{
+    let result = await fetch('http://localhost:5000/products');
+    result = await result.json();
+    setProducts(result);
+  }
+  console.warn("product",products);
+
+  // get category details
+
+  const getCategory = async()=>{
+    let result = await fetch('http://localhost:5000/get-category');
+    result = await result.json();
+    setCategorys(result);
+  }
+  console.warn("category",categorys);
+
+  const searchHandle = async(event)=>{
+    let key = event.target.value;
+    if(key){
+    let result = await fetch(`http://localhost:5000/search/${key}`);
+  result = await result.json();
+  if(result){
+    setProducts(result)
+  }
+}else{
+  getProducts();
+}
+  }
+
+  // const addToCart = async()=>{
+  //   let result = await fetch("http://localhost:5000/add-to-cart");
+  //   result = await result.json();
+  // }
+  
+  return (
+    
+    <div class="container">
+         <input class="search-field" type="search" placeholder="Search Product Here" onChange={searchHandle}/>
+    <div class="row-1">
+        <ul class="row">
+          {
+            categorys.map((i)=>
+          <li class="row-content">
+            <img class="row-img" src={i.img}/>
+            <p class="row-para">{i.title}</p>
+          </li>
+            )
+}
+          </ul>
     </div>
+   
+ 
+
+
+      <div class="row-2">
+        <ul>
+        <>
+            {
+              products.length>0 ? products.map((item)=>
+              <li>
+                <h6>offer</h6>
+                <b>{item.offerText}</b>
+               <img src={item.image}/>
+               <p class="title">{item.title}</p>
+               <p>Price:{item.price}</p>
+             
+               <button class="row-2-btn" onClick={()=>send(item)}>Add</button>
+               
+            </li>
+            )
+            : <h1>No Result Found</h1>
+              }
+            </>
+        </ul>
+        </div>
+        </div>
+        
 
   )
 }
+
 
 export default Category;

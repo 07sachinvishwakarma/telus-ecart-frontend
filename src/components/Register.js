@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link,useNavigate } from 'react-router-dom';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -7,15 +7,37 @@ const Register = () => {
     email: '',
     password: '',
   });
+  const navigate = useNavigate();
+   
+  useEffect(()=>{
+    const auth = localStorage.getItem('user');
+    if(auth){
+      navigate('/')
+    }
+  })
+
   const { username, email, password } = formData;
 
   const onChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const onSubmit = (e) => {
+  const onSubmit =async (e) => {
     e.preventDefault();
-    alert(JSON.stringify({username, email, password}));
+    console.log({username, email, password});
+   let result = await fetch('http://localhost:5000/register',{
+          method:'post',
+          body:JSON.stringify({name:username, email, password}),
+          headers:{
+            'Content-Type':'application/json'
+          },
+   });
+   result = await result.json()
+   console.log(result);
+   if(result){
+    localStorage.setItem("user",JSON.stringify(result));
+    navigate('/');
+   }
   };
   return (
     <div className='registration-page'>
